@@ -1,4 +1,4 @@
-package com.master.base;
+package com.master.base.activities;
 
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
+import com.master.base.R;
 import com.master.base.database.DatabaseManager;
 import com.master.base.models.Client;
 

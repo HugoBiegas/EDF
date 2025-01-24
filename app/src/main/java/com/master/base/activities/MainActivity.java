@@ -1,19 +1,13 @@
-package com.master.base;
+package com.master.base.activities;
 
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.database.Cursor;
-import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import com.master.base.R;
 import com.master.base.database.DatabaseManager;
 import com.master.base.models.*;
 
