@@ -40,6 +40,7 @@ public class ClientActivity extends AppCompatActivity {
                     public View getView(int position, View convertView, ViewGroup parent) {
                         View view = super.getView(position, convertView, parent);
                         Button editButton = view.findViewById(R.id.editClientButton);
+                        ImageButton deleteButton = view.findViewById(R.id.deleteClientButton);
                         Client client = getItem(position);
 
                         view.setClickable(false);
@@ -48,6 +49,8 @@ public class ClientActivity extends AppCompatActivity {
                             v.setTag("edit_button_clicked");
                             showEditClientDialog(client);
                         });
+
+                        deleteButton.setOnClickListener(v -> showDeleteClientDialog(client));
 
                         TextView clientName = view.findViewById(R.id.clientName);
                         clientName.setText(client.getNom());
@@ -63,6 +66,18 @@ public class ClientActivity extends AppCompatActivity {
             intent.putExtra("CLIENT_ID", client.getId());
             startActivity(intent);
         });
+    }
+
+    private void showDeleteClientDialog(Client client) {
+        new AlertDialog.Builder(this)
+                .setTitle("Supprimer le client")
+                .setMessage("Voulez-vous vraiment supprimer ce client ?")
+                .setPositiveButton("Oui", (dialog, which) -> {
+                    dbManager.getClientDAO().deleteClient(client.getId());
+                    loadClients();
+                })
+                .setNegativeButton("Non", null)
+                .show();
     }
 
     private void loadClients() {

@@ -8,10 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.ArrayAdapter;
+import android.widget.*;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -47,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
                     public View getView(int position, View convertView, ViewGroup parent) {
                         View view = super.getView(position, convertView, parent);
                         Button editButton = view.findViewById(R.id.editAgentButton);
+                        ImageButton deleteButton = view.findViewById(R.id.deleteAgentButton);
+
                         Agent agent = getItem(position);
 
                         view.setClickable(false);
@@ -55,6 +54,8 @@ public class MainActivity extends AppCompatActivity {
                             v.setTag("edit_button_clicked");
                             showEditAgentDialog(agent);
                         });
+
+                        deleteButton.setOnClickListener(v -> showDeleteAgentDialog(agent));
 
                         return view;
                     }
@@ -66,6 +67,18 @@ public class MainActivity extends AppCompatActivity {
             intent.putExtra("AGENT_ID", agent.getId());
             startActivity(intent);
         });
+    }
+
+    private void showDeleteAgentDialog(Agent agent) {
+        new AlertDialog.Builder(this)
+                .setTitle("Supprimer l'agent")
+                .setMessage("Voulez-vous vraiment supprimer cet agent ?")
+                .setPositiveButton("Oui", (dialog, which) -> {
+                    dbManager.getAgentDAO().deleteAgent(agent.getId());
+                    loadAgents();
+                })
+                .setNegativeButton("Non", null)
+                .show();
     }
 
     private void loadAgents() {

@@ -17,4 +17,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Modifier" />
+
+    <ImageButton
+            android:id="@+id/deleteClientButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/trash"
+            android:contentDescription="Supprimer"
+            android:padding="8dp"
+            android:layout_marginStart="8dp" />
 </LinearLayout>

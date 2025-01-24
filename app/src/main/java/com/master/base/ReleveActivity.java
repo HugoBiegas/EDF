@@ -43,12 +43,29 @@ public class ReleveActivity extends AppCompatActivity {
                     public View getView(int position, View convertView, ViewGroup parent) {
                         View view = super.getView(position, convertView, parent);
                         Button editButton = view.findViewById(R.id.editReleveButton);
+                        ImageButton deleteButton = view.findViewById(R.id.deleteReleveButton);
+
                         Releve releve = getItem(position);
+
                         editButton.setOnClickListener(v -> showEditReleveDialog(releve));
+                        deleteButton.setOnClickListener(v -> showDeleteReleveDialog(releve));
+
                         return view;
                     }
                 }
         );
+    }
+
+    private void showDeleteReleveDialog(Releve releve) {
+        new AlertDialog.Builder(this)
+                .setTitle("Supprimer le relevé")
+                .setMessage("Voulez-vous vraiment supprimer ce relevé ?")
+                .setPositiveButton("Oui", (dialog, which) -> {
+                    dbManager.getReleveDAO().deleteReleve(releve.getId());
+                    loadReleves();
+                })
+                .setNegativeButton("Non", null)
+                .show();
     }
 
     @SuppressLint("DefaultLocale")
@@ -103,7 +120,6 @@ public class ReleveActivity extends AppCompatActivity {
         EditText valeurInput = view.findViewById(R.id.releveValeurInput);
 
         if(!releves.isEmpty()){
-            // Vérifier si date du dernier relevé = date du jour
             String dateDernierReleve = releves.get(0).getDate();
             String dateAujourdhui = String.format("%tF", Calendar.getInstance());
 
@@ -116,28 +132,33 @@ public class ReleveActivity extends AppCompatActivity {
             valeurInput.setText(releves.get(0).getValeur() + "");
         }
 
-        builder.setView(view)
+        AlertDialog dialog = builder.setView(view)
                 .setTitle("Ajouter un relevé")
-                .setPositiveButton("Ajouter", (dialog, id) -> {
-                    try {
-                        double valeur = Double.parseDouble(valeurInput.getText().toString());
-                        List<Releve> existingReleves = dbManager.getReleveDAO().getRelevesByClient(clientId);
-                        validateReleveValue(valeur, existingReleves);
-
-                        @SuppressLint("DefaultLocale") String date = String.format("%d-%02d-%02d",
-                                datePicker.getYear(),
-                                datePicker.getMonth() + 1,
-                                datePicker.getDayOfMonth());
-                        validateDate(date, existingReleves);
-
-                        dbManager.getReleveDAO().insertReleve(date, valeur, clientId);
-                        loadReleves();
-                    } catch (IllegalArgumentException e) {
-                        Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
-                    }
-                })
+                .setPositiveButton("Ajouter", null)
                 .setNegativeButton("Annuler", null)
-                .show();
+                .create();
+
+        dialog.show();
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            try {
+                double valeur = Double.parseDouble(valeurInput.getText().toString());
+                List<Releve> existingReleves = dbManager.getReleveDAO().getRelevesByClient(clientId);
+                validateReleveValue(valeur, existingReleves);
+
+                @SuppressLint("DefaultLocale") String date = String.format("%d-%02d-%02d",
+                        datePicker.getYear(),
+                        datePicker.getMonth() + 1,
+                        datePicker.getDayOfMonth());
+                validateDate(date, existingReleves);
+
+                dbManager.getReleveDAO().insertReleve(date, valeur, clientId);
+                loadReleves();
+                dialog.dismiss();
+            } catch (IllegalArgumentException e) {
+                Toast.makeText(ReleveActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void showEditReleveDialog(Releve releve) {
@@ -146,7 +167,6 @@ public class ReleveActivity extends AppCompatActivity {
         DatePicker datePicker = view.findViewById(R.id.releveDatePicker);
         EditText valeurInput = view.findViewById(R.id.releveValeurInput);
 
-        // Parse existing date
         String[] dateParts = releve.getDate().split("-");
         datePicker.updateDate(
                 Integer.parseInt(dateParts[0]),
@@ -155,21 +175,37 @@ public class ReleveActivity extends AppCompatActivity {
         );
         valeurInput.setText(String.valueOf(releve.getValeur()));
 
-        builder.setView(view)
+        AlertDialog dialog = builder.setView(view)
                 .setTitle("Modifier le relevé")
-                .setPositiveButton("Modifier", (dialog, id) -> {
-                    @SuppressLint("DefaultLocale") String date = String.format("%d-%02d-%02d",
-                            datePicker.getYear(),
-                            datePicker.getMonth() + 1,
-                            datePicker.getDayOfMonth());
-                    releve.setDate(date);
-                    releve.setValeur(Double.parseDouble(valeurInput.getText().toString()));
-                    dbManager.getReleveDAO().updateReleve(releve);
-                    loadReleves();
-                })
+                .setPositiveButton("Modifier", null)
                 .setNegativeButton("Annuler", null)
-                .show();
+                .create();
+
+        dialog.show();
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            try {
+                @SuppressLint("DefaultLocale") String newDate = String.format("%d-%02d-%02d",
+                        datePicker.getYear(),
+                        datePicker.getMonth() + 1,
+                        datePicker.getDayOfMonth());
+
+                boolean dateExists = releves.stream()
+                        .filter(r -> r.getId() != releve.getId())
+                        .anyMatch(r -> r.getDate().equals(newDate));
+
+                if (dateExists) {
+                    throw new IllegalArgumentException("Un relevé existe déjà pour cette date");
+                }
+
+                releve.setDate(newDate);
+                releve.setValeur(Double.parseDouble(valeurInput.getText().toString()));
+                dbManager.getReleveDAO().updateReleve(releve);
+                loadReleves();
+                dialog.dismiss();
+            } catch (IllegalArgumentException e) {
+                Toast.makeText(ReleveActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
-
-
 }

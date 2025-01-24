@@ -38,9 +38,8 @@ public class DataInitializer {
             long agentId = agentIds[new Random().nextInt(agentIds.length)];
             long clientId = clientDAO.insertClient(clientName, agentId);
 
-            // Valeurs croissantes fixes
             double[] valeurs = {125.50, 225.75, 350.25};
-            // Dates croissantes
+
             String[] dates = {"2024-01-15", "2024-02-15", "2024-03-15"};
 
             for (int i = 0; i < 3; i++) {

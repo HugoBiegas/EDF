@@ -9,7 +9,7 @@ import com.master.base.utils.DataInitializer;
 
 public class DatabaseManager {
     private static DatabaseManager instance;
-    private SQLiteDatabase db;
+    private final SQLiteDatabase db;
     private AgentDAO agentDAO;
     private ClientDAO clientDAO;
     private ReleveDAO releveDAO;
@@ -26,7 +26,7 @@ public class DatabaseManager {
                     "valeur REAL NOT NULL, client_id INTEGER, FOREIGN KEY(client_id) REFERENCES client(id))";
 
     private DatabaseManager(Context context) {
-        db = context.openOrCreateDatabase("Test2", Context.MODE_PRIVATE, null);
+        db = context.openOrCreateDatabase("EDF", Context.MODE_PRIVATE, null);
         createTables();
         initializeDAOs();
         initializeData();
